@@ -42,6 +42,7 @@ exports.handler = (event, context, callback) => {
       set === undefined ||
       token === undefined
     ) {
+      console.log(event);
       result_statusCode = 422;
       result_body = JSON.stringify({
         status: 'Failed',
