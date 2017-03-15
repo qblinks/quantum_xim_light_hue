@@ -3,6 +3,8 @@
 ## Prepare
 
 1. Run 'npm install'.
+1. Add auth_url=https://authdev.qblinks.com/api into shell environment variables.
+1. Add xim_url=https://ximdev.qblinks.com/api into shell environment variables.
 1. Add ./bin into shell PATH variable.
 1. Using Qblinks Clound account and password to login and get valid Quantum Token.
 1. Get OAuth URL and proceed OAuth processes on Browser.

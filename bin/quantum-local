@@ -2,6 +2,9 @@
 
 'use strict';
 
+const request = require('request'),
+  utils = require('../lib/utils.js');
+
 /*
  * Local executor for Amazon Lambda function
  */
@@ -15,8 +18,8 @@
         ]
     });
 
-    var lambdaLocal = require('../node_modules/lambda-local/lib/lambdalocal.js'),
-        utils = require('../node_modules/lambda-local/lib/utils.js');
+    var lambdaLocal = require('../lib/lambdalocal.js'),
+        utils = require('../lib/utils.js');
     lambdaLocal.setLogger(logger);
 
     // process opts
@@ -72,29 +75,81 @@
     }
 
     var event = require(utils.getAbsolutePath(eventPath));
+    const load_post_object = JSON.parse(JSON.stringify(event));
+    delete load_post_object.method;
+    const load_post_data = JSON.stringify(load_post_object);
 
-    // execute
-    lambdaLocal.execute({
-        event: event,
-        lambdaPath: lambdaPath,
-        lambdaHandler: lambdaHandler,
-        profilePath: profilePath,
-        profileName: profileName,
-        region: region,
-        callbackWaitsForEmptyEventLoop: callbackWaitsForEmptyEventLoop,
-        timeoutMs: timeoutMs,
-        callback: function(err /*, data */) { //data unused
-            logger.log('info', '-----');
-            if (err === null) {
-                logger.log('info', 'lambda-local successfully complete.');
-                process.exit(0);
-            } else {
-                logger.log('error', 'lambda-local failed.');
-                // Finish the process
-                process.exit(1);
-            }
-        }
+    const https_options = {
+      method: 'POST',
+      url: `${process.env.xim_url}/loadExtraPayload`,
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(load_post_data),
+      },
+    };
+
+    const req = request(https_options, (error, response, load_body) => {
+      const bodyJSON = JSON.parse(JSON.parse(load_body));
+      if (typeof bodyJSON.message !== 'undefined') {
+        // TO-do: error handling
+      }
+      event.xim_content = bodyJSON.xim_content;
+      // execute
+      lambdaLocal.execute({
+          event: event,
+          lambdaPath: lambdaPath,
+          lambdaHandler: lambdaHandler,
+          profilePath: profilePath,
+          profileName: profileName,
+          region: region,
+          callbackWaitsForEmptyEventLoop: callbackWaitsForEmptyEventLoop,
+          timeoutMs: timeoutMs,
+          callback: function(err , data) { //data unused
+              logger.log('info', '-----');
+              if (err === null) {
+                const result_json = JSON.parse(data.body);
+                const save_post_object = JSON.parse(JSON.stringify(event));
+                save_post_object.quantum_token = load_post_object.quantum_token;
+                const save_post_data = JSON.stringify(save_post_object);
+
+                const https_options = {
+                  method: 'POST',
+                  url: `${process.env.xim_url}/saveExtraPayload`,
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': Buffer.byteLength(save_post_data),
+                  },
+                };
+
+                const req = request(https_options, (error, response, save_body) => {
+                  delete result_json.method;
+                  delete result_json.xim_content;
+                  logger.log('info', 'Message');
+                  logger.log('info', '------');
+                  utils.outputJSON(result_json, logger);
+                  logger.log('info', 'lambda-local successfully complete.');
+                  process.exit(0);
+                });
+
+                req.write(save_post_data);
+                req.end();
+
+
+              } else {
+                  logger.log('error', 'lambda-local failed.');
+                  // Finish the process
+                  process.exit(1);
+              }
+          }
+      });
+
     });
+
+    req.write(load_post_data);
+    req.end();
+
+
+
 
     // Handling timeout
     setTimeout(function() {
