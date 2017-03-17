@@ -89,7 +89,7 @@ function get_bridge(hue_access_token, briCb) {
  * @param  {Function} callback callback to be used by the XIM driver
  */
 function authenticate(options, callback) {
-  const callback_options = options;
+  const callback_options = JSON.parse(JSON.stringify(options));
   callback_options.result = {};
   callback_options.xim_content = {};
   get_hue_token(callback_options.quantum_token,

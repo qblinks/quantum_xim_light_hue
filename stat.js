@@ -48,7 +48,7 @@ function get_state(hue_access_token, bridgeid, id, get_state_callback) {
   */
 function stat(options, callback) {
   // this is an empty function to be implemented or a place holder
-  const callback_option = options;
+  const callback_option = JSON.parse(JSON.stringify(options));
   callback_option.result = {};
   callback_option.list = [];
   if (!options.xim_content.hue_access_token || !options.xim_content.bridgeid) {
