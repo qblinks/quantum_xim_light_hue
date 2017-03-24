@@ -47,14 +47,13 @@ function get_list_and_state(hue_access_token, bridgeid, get_state_callback) {
  */
 function discovery(options, callback) {
   const callback_options = JSON.parse(JSON.stringify(options));
-  callback_options.list = [];
-  callback_options.xim_content.lights = {};
   callback_options.result = {};
   if (!options.xim_content.hue_access_token || !options.xim_content.bridgeid) {
     callback_options.result.err_no = 2;
     callback_options.result.err_msg = 'no token';
     callback(callback_options);
   } else {
+    callback_options.list = [];
     callback_options.xim_content.lights = [];
     get_list_and_state(options.xim_content.hue_access_token,
     options.xim_content.bridgeid, (result) => {
@@ -79,8 +78,10 @@ function discovery(options, callback) {
           callback_options.xim_content.lights[key] = light;
           callback_options.list.push(light);
         });
+
         callback_options.result.err_no = 0;
         callback_options.result.err_msg = 'ok';
+
         callback(callback_options);
       }
     });

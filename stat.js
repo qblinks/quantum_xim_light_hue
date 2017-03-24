@@ -51,35 +51,36 @@ function stat(options, callback) {
   const callback_option = JSON.parse(JSON.stringify(options));
   callback_option.result = {};
   callback_option.list = [];
-  if (!options.xim_content.hue_access_token || !options.xim_content.bridgeid) {
+  if (typeof options.xim_content === 'undefined' || !options.xim_content.hue_access_token || !options.xim_content.bridgeid) {
     callback_option.result.err_no = 2;
     callback_option.result.err_msg = 'no token';
     callback(callback_option);
-  }
-  get_state(options.xim_content.hue_access_token, options.xim_content.bridgeid,
-    options.device_id, (result) => {
-      if (result.code === '404' || result.fault || result.code === '109') {
-        callback_option.result.err_no = 1;
-        callback_option.result.err_msg = 'fail';
+  } else {
+    get_state(options.xim_content.hue_access_token, options.xim_content.bridgeid,
+      options.device_id, (result) => {
+        if (result.code === '404' || result.fault || result.code === '109') {
+          callback_option.result.err_no = 1;
+          callback_option.result.err_msg = 'fail';
+          callback(callback_option);
+        }
+        const light = {};
+        light.device_name = result.name;
+        light.device_id = options.device_id;
+        light.light_type = 'color';
+        light.infrared_support = false;
+        light.native_toggle_support = false;
+        light.light_status = {};
+        light.light_status.hue = parseInt((result.state.hue * 360) / 65534, 10);
+        light.light_status.saturation = parseInt((result.state.sat * 100) / 254, 10);
+        light.light_status.brightness = parseInt((result.state.bri * 100) / 254, 10);
+        light.light_status.onoff = result.state.on;
+        callback_option.list.push(light);
+        callback_option.result = {};
+        callback_option.result.err_no = 0;
+        callback_option.result.err_msg = 'ok';
         callback(callback_option);
-      }
-      const light = {};
-      light.device_name = result.name;
-      light.device_id = options.device_id;
-      light.light_type = 'color';
-      light.infrared_support = false;
-      light.native_toggle_support = false;
-      light.light_status = {};
-      light.light_status.hue = parseInt((result.state.hue * 360) / 65534, 10);
-      light.light_status.saturation = parseInt((result.state.sat * 100) / 254, 10);
-      light.light_status.brightness = parseInt((result.state.bri * 100) / 254, 10);
-      light.light_status.onoff = result.state.on;
-      callback_option.list.push(light);
-      callback_option.result = {};
-      callback_option.result.err_no = 0;
-      callback_option.result.err_msg = 'ok';
-      callback(callback_option);
-    });
+      });
+  }
 }
 
 
