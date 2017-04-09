@@ -24,7 +24,7 @@ const request = require('request');
 function get_list_and_state(hue_access_token, bridgeid, get_state_callback) {
   const get_state_options = {
     method: 'GET',
-    url: `https://api.meethue.com/v1/bridges/${bridgeid}/lights`,
+    url: `https://api.meethue.com/v1/bridges/${bridgeid}`,
     headers: {
       'content-type': 'application/json',
       authorization: `Bearer ${hue_access_token}`,
@@ -54,6 +54,7 @@ function discovery(options, callback) {
     callback(callback_options);
   } else {
     callback_options.list = [];
+    callback_options.groups = [];
     callback_options.xim_content.lights = [];
     get_list_and_state(options.xim_content.hue_access_token,
     options.xim_content.bridgeid, (result) => {
@@ -63,25 +64,34 @@ function discovery(options, callback) {
         callback(callback_options);
       } else {
         callback_options.xim_content.lights = {};
-        Object.keys(result).forEach((key) => {
+        Object.keys(result.lights).forEach((key) => {
           const light = {};
-          light.device_name = result[key].name;
+          light.device_name = result.lights[key].name;
           light.device_id = key;
           light.light_type = 'color';
           light.infrared_support = false;
           light.native_toggle_support = false;
           light.light_status = {};
-          light.light_status.hue = parseInt((result[key].state.hue * 360) / 65534, 10);
-          light.light_status.saturation = parseInt((result[key].state.sat * 100) / 254, 10);
-          light.light_status.brightness = parseInt((result[key].state.bri * 100) / 254, 10);
-          light.light_status.onoff = result[key].state.on;
+          light.light_status.hue = parseInt((result.lights[key].state.hue * 360) / 65534, 10);
+          light.light_status.saturation = parseInt((result.lights[key].state.sat * 100) / 254, 10);
+          light.light_status.brightness = parseInt((result.lights[key].state.bri * 100) / 254, 10);
+          light.light_status.onoff = result.lights[key].state.on;
           callback_options.xim_content.lights[key] = light;
           callback_options.list.push(light);
         });
-
+        if (typeof result.groups !== 'undefined') {
+          Object.keys(result.groups).forEach((groupkey) => {
+            const group = {};
+            group.group_name = result.groups[groupkey].name;
+            group.group_id = parseInt(groupkey, 10) + 90000;
+            group.light_status = {};
+            group.light_status.onoff = true;
+            callback_options.xim_content.lights[groupkey] = group;
+            callback_options.groups.push(group);
+          });
+        }
         callback_options.result.err_no = 0;
         callback_options.result.err_msg = 'ok';
-
         callback(callback_options);
       }
     });
