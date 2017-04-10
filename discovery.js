@@ -86,7 +86,7 @@ function discovery(options, callback) {
             group.group_id = parseInt(groupkey, 10) + 90000;
             group.light_status = {};
             group.light_status.onoff = true;
-            callback_options.xim_content.lights[groupkey] = group;
+            callback_options.xim_content.lights[group.group_id] = group;
             callback_options.groups.push(group);
           });
         }

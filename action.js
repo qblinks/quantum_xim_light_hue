@@ -35,8 +35,8 @@ function goaction(hue_access_token, bridgeid, no, actionbody, actionCb) {
     json: true,
     body: actionbody,
   };
-  if (no > 1000) {
-    options.url = `https://api.meethue.com/v1/bridges/${bridgeid}/groups/${no - 1000}/action`;
+  if (no > 90000) {
+    options.url = `https://api.meethue.com/v1/bridges/${bridgeid}/groups/${no - 90000}/action`;
   }
   request(options, (error, response, body) => {
     if (error) actionCb(false);
@@ -173,7 +173,7 @@ function action(option, callback) {
         callback(callback_option);
       }
       if (typeof option.xim_content !== 'undefined' && typeof hue.on !== 'undefined') {
-        if (typeof callback_option.xim_content.lights[option.device_id].light_status !== 'undefined') {
+        if (typeof callback_option.xim_content.lights[option.device_id] !== 'undefined') {
           callback_option.xim_content.lights[option.device_id].light_status.onoff = hue.on;
         }
       }
