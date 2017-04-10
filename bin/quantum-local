@@ -92,12 +92,12 @@ const request = require('request'),
       if (response.statusCode != 200) {
         // error handling
         logger.log('error', 'Invalid XIM driver input.');
-        console.log(load_body);
         process.exit(0);
       } else {
         const bodyJSON = JSON.parse(JSON.parse(load_body));
         if (typeof bodyJSON.message !== 'undefined') {
           // TO-do: error handling
+          console.log(load_body);
         }
         event.xim_content = bodyJSON.xim_content;
         // execute
@@ -114,7 +114,7 @@ const request = require('request'),
                 logger.log('info', '-----');
                 if (err === null) {
                   const result_json = JSON.parse(data.body);
-                  const save_post_object = JSON.parse(JSON.stringify(event));
+                  const save_post_object = JSON.parse(JSON.stringify(result_json));
                   save_post_object.quantum_token = load_post_object.quantum_token;
                   const save_post_data = JSON.stringify(save_post_object);
 
