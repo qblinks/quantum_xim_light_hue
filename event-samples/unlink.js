@@ -19,5 +19,4 @@ module.exports = {
   xim_channel: 'hue',
   xim_channel_set: 0,
   quantum_token: my_quantum_token,
-  device_id: 4,
 };

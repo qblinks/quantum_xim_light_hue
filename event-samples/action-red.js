@@ -12,6 +12,7 @@
 const xim_config = require('../.xim_config.js');
 
 const my_quantum_token = xim_config.quantum_token;
+const my_device_id = xim_config.my_device_id;
 
 module.exports = {
   method: 'action',
@@ -19,7 +20,7 @@ module.exports = {
   xim_channel: 'hue',
   xim_channel_set: 0,
   quantum_token: my_quantum_token,
-  device_id: 4,
+  device_id: my_device_id,
   light_action: {
     short_color_code: 'red',
   },
