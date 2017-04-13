@@ -67,7 +67,7 @@ function discovery(options, callback) {
         Object.keys(result.lights).forEach((key) => {
           const light = {};
           light.device_name = result.lights[key].name;
-          light.device_id = key;
+          light.device_id = `${key}`;
           light.light_type = 'color';
           light.infrared_support = false;
           light.native_toggle_support = false;
@@ -82,11 +82,11 @@ function discovery(options, callback) {
         if (typeof result.groups !== 'undefined') {
           Object.keys(result.groups).forEach((groupkey) => {
             const group = {};
+            const group_id = parseInt(groupkey, 10) + 90000;
             group.group_name = result.groups[groupkey].name;
-            group.group_id = parseInt(groupkey, 10) + 90000;
+            group.group_id = `${group_id}`;
             group.light_status = {};
             group.light_status.onoff = true;
-            callback_options.xim_content.lights[group.group_id] = group;
             callback_options.xim_content.lights[parseInt(groupkey, 10) + 90000] = group;
             delete group.light_status;
             callback_options.groups.push(group);

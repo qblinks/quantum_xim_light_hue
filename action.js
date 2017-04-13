@@ -136,6 +136,9 @@ function action(option, callback) {
     if (option.light_action.toggle) {
       if (typeof option.xim_content.lights[option.device_id] !== 'undefined') {
         const light = option.xim_content.lights[option.device_id];
+        if (typeof light.light_status === 'undefined') {
+          light.light_status = {};
+        }
         if (light.light_status.onoff) {
           hue.on = false;
         } else {
@@ -165,7 +168,7 @@ function action(option, callback) {
   }
   // http request
   goaction(option.xim_content.hue_access_token, option.xim_content.bridgeid,
-    option.device_id, hue, (result) => {
+    parseInt(option.device_id, 10), hue, (result) => {
       callback_option.result = {};
       if (result === false) {
         callback_option.result.err_no = 1;
@@ -173,7 +176,7 @@ function action(option, callback) {
         callback(callback_option);
       }
       if (typeof option.xim_content !== 'undefined' && typeof hue.on !== 'undefined') {
-        if (typeof callback_option.xim_content.lights[option.device_id] !== 'undefined') {
+        if (typeof callback_option.xim_content.lights[option.device_id].light_status !== 'undefined') {
           callback_option.xim_content.lights[option.device_id].light_status.onoff = hue.on;
         }
       }
