@@ -92,6 +92,7 @@ const request = require('request'),
       if (response.statusCode != 200) {
         // error handling
         logger.log('error', 'Invalid XIM driver input.');
+        console.log(load_body);
         process.exit(0);
       } else {
         const bodyJSON = JSON.parse(JSON.parse(load_body));
@@ -147,8 +148,6 @@ const request = require('request'),
 
                   req.write(save_post_data);
                   req.end();
-
-
                 } else {
                     logger.log('error', 'lambda-local failed.');
                     // Finish the process
