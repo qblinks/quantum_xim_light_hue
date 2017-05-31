@@ -1,0 +1,23 @@
+{
+    "xim_type":"light",
+    "xim_channel":"hue",
+    "xim_channel_set":0,
+    "device_id":"4",
+    "action":{"toggle":true},
+    "result":{"err_no":0,"err_msg":"ok"},
+    "xim_content":{
+        "access_token":"uA8Ft9uNdts8qKjGTceIhf21gdJN",
+        "hue_access_token":"uA8Ft9uNdts8qKjGTceIhf21gdJN",
+        "bridgeid":"001788fffe154a00",
+        "lights":{
+            "2":{
+                "infrared_support":false,
+                "device_name":"on Samson's Desk",
+                "light_type":"color",
+                "device_id":"2",
+                "light_status":{"saturation":20,"brightness":100,"hue":90,"onoff":false},"native_toggle_support":false},
+            "3":{"infrared_support":false,"device_name":"on Liming's Desk","light_type":"color","device_id":"3","light_status":{"saturation":20,"brightness":100,"hue":90,"onoff":false},"native_toggle_support":false},
+            "4":{"infrared_support":false,"device_name":"Next to Printer","light_type":"color","device_id":"4","light_status":{"saturation":20,"brightness":100,"hue":90,"onoff":false},"native_toggle_support":false},
+            "90002":{"group_id":"90002","group_name":"走道"},
+            "90003":{"group_id":"90003","group_name":"Office"}}},
+    "method":"action"}
