@@ -143,10 +143,10 @@ function action(option, callback) {
     return;
   }
   // toggle
-  if (typeof option.light_action.onoff !== 'undefined') {
-    hue.on = option.light_action.onoff;
-  } else if (typeof option.light_action.toggle !== 'undefined') {
-    if (option.light_action.toggle) {
+  if (typeof option.action.onoff !== 'undefined') {
+    hue.on = option.action.onoff;
+  } else if (typeof option.action.toggle !== 'undefined') {
+    if (option.action.toggle) {
       if (typeof option.xim_content.lights[option.device_id] !== 'undefined') {
         const light = option.xim_content.lights[option.device_id];
         if (typeof light.light_status === 'undefined') {
@@ -162,22 +162,22 @@ function action(option, callback) {
   }
 
   // color
-  if (option.light_action.hue && option.light_action.brightness && option.light_action.saturation) {
-    hue.hue = parseInt((option.light_action.hue * 65535) / 360, 10);
-  } else if (option.light_action.rgb) {
-    rgb = hex_to_rgb(option.light_action.rgb);
+  if (option.action.hue && option.action.brightness && option.action.saturation) {
+    hue.hue = parseInt((option.action.hue * 65535) / 360, 10);
+  } else if (option.action.rgb) {
+    rgb = hex_to_rgb(option.action.rgb);
     hue.xy = rgb_to_xy(rgb[0], rgb[1], rgb[2]);
-  } else if (option.light_action.short_color_code) {
-    rgb = convert.keyword.rgb(option.light_action.short_color_code);
+  } else if (option.action.short_color_code) {
+    rgb = convert.keyword.rgb(option.action.short_color_code);
     hue.xy = rgb_to_xy(rgb[0], rgb[1], rgb[2]);
   }
   // brightness
-  if (typeof option.light_action.brightness !== 'undefined') {
-    hue.bri = parseInt((option.light_action.brightness * 255) / 100, 10);
+  if (typeof option.action.brightness !== 'undefined') {
+    hue.bri = parseInt((option.action.brightness * 255) / 100, 10);
   }
   // saturation
-  if (typeof option.light_action.saturation !== 'undefined') {
-    hue.sat = parseInt((option.light_action.saturation * 255) / 100, 10);
+  if (typeof option.action.saturation !== 'undefined') {
+    hue.sat = parseInt((option.action.saturation * 255) / 100, 10);
   }
   // http request
   goaction(option.xim_content.hue_access_token, option.xim_content.bridgeid,
@@ -193,7 +193,7 @@ function action(option, callback) {
           callback_option.xim_content.lights[option.device_id].light_status.onoff = hue.on;
         }
       }
-      delete callback_option.light_action;
+      delete callback_option.action;
       delete callback_option.device_id;
       callback_option.result.err_no = 0;
       callback_option.result.err_msg = 'ok';
