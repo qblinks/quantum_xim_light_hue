@@ -12,6 +12,7 @@
 'use strict';
 
 const request = require('request');
+const merge = require('merge');
 
 /**
  * get the id of connected HUE  bridge
@@ -53,7 +54,7 @@ function get_bridge(hue_access_token, briCb) {
 function authenticate(options, callback) {
   const callback_options = JSON.parse(JSON.stringify(options));
   callback_options.result = {};
-  callback_options.xim_content = {};
+  callback_options.xim_content = merge({}, options.xim_content);
 
   if (typeof callback_options.xim_content.access_token === 'undefined') {
     callback_options.result.err_no = 113;
