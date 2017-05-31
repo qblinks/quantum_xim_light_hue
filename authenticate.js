@@ -14,49 +14,6 @@
 const request = require('request');
 
 /**
- * get the hue api token
- *
- * @param {string} qblinks_token qblinks dev account access token
- * @param {function} tokenCb callback of this function
- */
-function get_hue_token(qblinks_token, set, tokenCb) {
-  const options = {
-    method: 'GET',
-    url: `${process.env.auth_url}/token/hue/${set}`,
-    headers: {
-      authorization: `Bearer ${qblinks_token}`,
-    },
-    formData: {} };
-  request(options, (error, response, body) => {
-    if (error) throw new Error(error);
-    const contact = JSON.parse(body);
-    tokenCb(contact);
-  });
-}
-
-/**
- * refresh hue access_token
- *
- * @param {string} qblinks_token qblinks dev account access token
- * @param {function} refCb callback of this function
- */
-function refresh_hue_token(qblinks_token, set, refCb) {
-  const options = {
-    method: 'POST',
-    url: `${process.env.auth_url}/refresh_token/hue/${set}`,
-    headers: {
-      authorization: `Bearer ${qblinks_token}`,
-    },
-  };
-  // console.log(options);
-  request(options, (error, response, body) => {
-    if (error) throw new Error(error);
-    const contact = JSON.parse(body);
-    refCb(contact);
-  });
-}
-
-/**
  * get the id of connected HUE  bridge
  *
  * @param {string} hue_access_token Philips Hue account access token
@@ -71,7 +28,6 @@ function get_bridge(hue_access_token, briCb) {
       authorization: `Bearer ${hue_access_token}`,
     },
   };
-  console.log(bridgesOptions);
   request(bridgesOptions, (error, response, body) => {
     if (error) throw new Error(error);
     const contact = JSON.parse(body);
@@ -98,31 +54,27 @@ function authenticate(options, callback) {
   const callback_options = JSON.parse(JSON.stringify(options));
   callback_options.result = {};
   callback_options.xim_content = {};
-  get_hue_token(callback_options.quantum_token,
-    callback_options.xim_channel_set, (token_result) => {
-      if (token_result.result === 'false') {
-        callback_options.result.err_no = 113;
-        callback_options.result.err_msg = 'No Access Token';
-        callback(callback_options);
-      }
-      callback_options.xim_content.hue_access_token = token_result.access_token;
-      get_bridge(callback_options.xim_content.hue_access_token, (briCb) => {
-        if (briCb === 0) {
-          refresh_hue_token(callback_options.quantum_token,
-            callback_options.xim_channel_set, (ref) => {
-              callback_options.xim_content.hue_access_token = ref.access_token;
-              callback_options.result.err_no = 112;
-              callback_options.result.err_msg = 'Refresh Access Token';
-              callback(callback_options);
-            });
-        } else {
-          callback_options.xim_content.bridgeid = briCb;
-          callback_options.result.err_no = 0;
-          callback_options.result.err_msg = 'ok';
-          callback(callback_options);
-        }
-      });
-    });
+
+  if (typeof callback_options.xim_content.access_token === 'undefined') {
+    callback_options.result.err_no = 113;
+    callback_options.result.err_msg = 'No Access Token';
+    callback(callback_options);
+    return;
+  }
+
+  callback_options.xim_content.hue_access_token = callback_options.xim_content.access_token;
+  get_bridge(callback_options.xim_content.hue_access_token, (briCb) => {
+    if (briCb === 0) {
+      callback_options.result.err_no = 112;
+      callback_options.result.err_msg = 'Refresh Access Token';
+      callback(callback_options);
+    } else {
+      callback_options.xim_content.bridgeid = briCb;
+      callback_options.result.err_no = 0;
+      callback_options.result.err_msg = 'ok';
+      callback(callback_options);
+    }
+  });
 }
 
 /**
