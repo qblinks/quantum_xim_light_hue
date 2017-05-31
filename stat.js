@@ -59,9 +59,11 @@ function stat(options, callback) {
     get_state(options.xim_content.hue_access_token, options.xim_content.bridgeid,
       options.device_id, (result) => {
         if (result.code === '404' || result.fault || result.code === '109') {
+          console.log(result);
           callback_option.result.err_no = 1;
           callback_option.result.err_msg = 'fail';
           callback(callback_option);
+          return;
         }
         const light = {};
         light.device_name = result.name;
@@ -78,6 +80,7 @@ function stat(options, callback) {
         callback_option.result = {};
         callback_option.result.err_no = 0;
         callback_option.result.err_msg = 'ok';
+        delete callback_option.device_id;
         callback(callback_option);
       });
   }

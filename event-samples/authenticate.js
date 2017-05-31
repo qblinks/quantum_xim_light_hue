@@ -12,13 +12,11 @@
 const xim_config = require('../.xim_config.js');
 
 const my_quantum_token = xim_config.quantum_token;
-const my_device_id = xim_config.device_id;
 
 module.exports = {
-  method: 'stat',
+  method: 'authenticate',
   xim_type: 'light',
   xim_channel: 'hue',
   xim_channel_set: 0,
   quantum_token: my_quantum_token,
-  device_id: my_device_id,
 };

@@ -11,6 +11,8 @@
 
 'use strict';
 
+const merge = require('merge');
+
 const xim_driver = {};
 xim_driver.action = require('./action.js');
 xim_driver.authenticate = require('./authenticate.js');
@@ -20,6 +22,10 @@ xim_driver.unlink = require('./unlink.js');
 
 exports.handler = (event, context, callback) => {
   const method = event.method;
+  const input = merge({}, event);
+
+  delete input.method;
+
   let result_body = '{}';
   let result_statusCode = 200;
 
@@ -35,12 +41,10 @@ exports.handler = (event, context, callback) => {
     const type = event.xim_type;
     const channel = event.xim_channel;
     const set = event.xim_channel_set;
-    const token = event.quantum_token;
 
     if (type === undefined ||
       channel === undefined ||
-      set === undefined ||
-      token === undefined
+      set === undefined
     ) {
       result_statusCode = 422;
       result_body = JSON.stringify({
@@ -66,7 +70,7 @@ exports.handler = (event, context, callback) => {
 
       callback(null, result_response);
     } else {
-      xim_driver[method](event, (options) => {
+      xim_driver[method](input, (options) => {
         const result_options = options;
         result_statusCode = 200;
         delete result_options.quantum_token;
