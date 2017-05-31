@@ -101,8 +101,8 @@ function authenticate(options, callback) {
   get_hue_token(callback_options.quantum_token,
     callback_options.xim_channel_set, (token_result) => {
       if (token_result.result === 'false') {
-        callback_options.result.err_no = 1;
-        callback_options.result.err_msg = 'havent token';
+        callback_options.result.err_no = 113;
+        callback_options.result.err_msg = 'No Access Token';
         callback(callback_options);
       }
       callback_options.xim_content.hue_access_token = token_result.access_token;

@@ -124,10 +124,23 @@ function action(option, callback) {
   callback_option.xim_channel = option.xim_channel;
   callback_option.xim_channel_set = option.xim_channel_set;
   callback_option.result = {};
-  if (typeof option.xim_content === 'undefined' || typeof option.xim_content.hue_access_token === 'undefined' || typeof option.xim_content.bridgeid === 'undefined') {
-    callback_option.result.err_no = 2;
-    callback_option.result.err_msg = 'xim_content undefined or hue_access_token undefined or bridgeid undefined.';
+  if (typeof option.xim_content === 'undefined') {
+    callback_option.result.err_no = 113;
+    callback_option.result.err_msg = 'No Access Token';
     callback(callback_option);
+    return;
+  }
+  if (typeof option.xim_content.hue_access_token === 'undefined') {
+    callback_option.result.err_no = 113;
+    callback_option.result.err_msg = 'No Access Token';
+    callback(callback_option);
+    return;
+  }
+  if (typeof option.xim_content.bridgeid === 'undefined') {
+    callback_option.result.err_no = 120;
+    callback_option.result.err_msg = 'Invalid Bridge ID';
+    callback(callback_option);
+    return;
   }
   // toggle
   if (typeof option.light_action.onoff !== 'undefined') {

@@ -52,8 +52,8 @@ function stat(options, callback) {
   callback_option.result = {};
   callback_option.list = [];
   if (typeof options.xim_content === 'undefined' || !options.xim_content.hue_access_token || !options.xim_content.bridgeid) {
-    callback_option.result.err_no = 2;
-    callback_option.result.err_msg = 'no token';
+    callback_option.result.err_no = 113;
+    callback_option.result.err_msg = 'No Access Token';
     callback(callback_option);
   } else {
     get_state(options.xim_content.hue_access_token, options.xim_content.bridgeid,
