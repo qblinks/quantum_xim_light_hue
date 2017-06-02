@@ -11,6 +11,7 @@
 
 'use strict';
 
+const fs = require('fs');
 const merge = require('merge');
 
 const xim_driver = {};
@@ -19,6 +20,19 @@ xim_driver.authenticate = require('./authenticate.js');
 xim_driver.discovery = require('./discovery.js');
 xim_driver.stat = require('./stat.js');
 xim_driver.unlink = require('./unlink.js');
+
+xim_driver.version = (event, callback) => {
+  const output = merge({}, event);
+  const commit = fs.readFileSync('./commit_info.json') || '{"id":null,"message":null,"author":null}';
+  const info = JSON.parse(commit) || { id: null, message: null, author: null };
+
+  output.version = info;
+  output.result = {
+    err_no: 0,
+    err_msg: 'ok',
+  };
+  callback(output);
+};
 
 exports.handler = (event, context, callback) => {
   const method = event.method;
@@ -35,6 +49,7 @@ exports.handler = (event, context, callback) => {
     action: true,
     stat: true,
     unlink: true,
+    version: true,
   };
 
   if (supportMethodMap[method]) {
