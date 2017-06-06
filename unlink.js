@@ -11,6 +11,8 @@
 
 'use strict';
 
+const merge = require('merge');
+
  /**
   * Deactivate this channel
   *
@@ -20,7 +22,12 @@
   * @param {function} callback to be used by the XIM driver
   */
 function unlink(options, callback) {
-  callback(options);
+  const output = merge({}, options);
+  output.result = {
+    err_no: 0,
+    err_msg: 'ok',
+  };
+  callback(output);
 }
 
 /**
