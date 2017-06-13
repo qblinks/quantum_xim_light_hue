@@ -94,6 +94,7 @@ function discovery(options, callback) {
           const light = {};
           light.device_name = result.lights[key].name;
           light.device_id = `${key}`;
+          light.is_group = false;
           if (result.lights[key].type === 'Dimmable light' ||
               result.lights[key].type === 'Dimmable plug-in unit') {
             light.light_type = 'dimmer';

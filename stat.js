@@ -68,6 +68,7 @@ function stat(options, callback) {
         const light = {};
         light.device_name = result.name;
         light.device_id = options.device_id;
+        light.is_group = false;
         light.light_type = 'color';
         light.infrared_support = false;
         light.native_toggle_support = false;
