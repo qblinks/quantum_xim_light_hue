@@ -107,6 +107,7 @@ function discovery(options, callback) {
           }
           light.infrared_support = false;
           light.native_toggle_support = false;
+          light.is_group = false;
           light.light_status = {};
           if (light.light_type === 'color' && result.lights[key].type !== 'Color temperature light' && result.lights[key].type !== 'On/Off plug-in unit') {
             light.light_status.hue = parseInt((result.lights[key].state.hue * 360) / 65534, 10);

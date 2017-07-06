@@ -72,6 +72,7 @@ function stat(options, callback) {
         light.light_type = 'color';
         light.infrared_support = false;
         light.native_toggle_support = false;
+        light.is_group = false;
         light.light_status = {};
         light.light_status.hue = parseInt((result.state.hue * 360) / 65534, 10);
         light.light_status.saturation = parseInt((result.state.sat * 100) / 254, 10);
