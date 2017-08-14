@@ -9,6 +9,8 @@
  * expressly prescribing the scope and manner of such use.
  */
 
+'use strict';
+
 const xim_config = require('../.xim_config.js');
 
 const my_quantum_token = xim_config.quantum_token;

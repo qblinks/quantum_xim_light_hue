@@ -1,0 +1,10 @@
+{
+  "xim_type": "light",
+  "xim_channel": "hue",
+  "xim_channel_set": 0,
+  "method": "discovery",
+  "xim_content": {
+    "access_token": "Mwk87TnQVup5IrUBszaweN2686xs",
+    "hue_access_token": "Mwk87TnQVup5IrUBszaweN2686xs"
+  }
+}

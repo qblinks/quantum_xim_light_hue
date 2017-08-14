@@ -11,16 +11,6 @@
 
 'use strict';
 
-const xim_config = require('../.xim_config.js');
+const fs = require('fs');
 
-const my_quantum_token = xim_config.quantum_token;
-const my_device_id = xim_config.device_id;
-
-module.exports = {
-  method: 'stat',
-  xim_type: 'light',
-  xim_channel: 'hue',
-  xim_channel_set: 0,
-  quantum_token: my_quantum_token,
-  device_id: my_device_id,
-};
+module.exports = JSON.parse(fs.readFileSync('./event-samples/discovery-no_access_token.json'));

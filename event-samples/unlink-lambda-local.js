@@ -9,6 +9,8 @@
  * expressly prescribing the scope and manner of such use.
  */
 
+'use strict';
+
 const fs = require('fs');
 
 module.exports = JSON.parse(fs.readFileSync('./event-samples/unlink-lambda-local.json'));
