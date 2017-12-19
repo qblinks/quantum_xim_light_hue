@@ -1,25 +1,36 @@
 #!/usr/bin/env node
+/*
+ * Copyright (c) 2017
+ * Qblinks Incorporated ("Qblinks").
+ * All rights reserved.
+ *
+ * The information contained herein is confidential and proprietary to
+ * Qblinks. Use of this information by anyone other than authorized employees
+ * of Qblinks is granted only under a written non-disclosure agreement,
+ * expressly prescribing the scope and manner of such use.
+ */
 
 'use strict';
 
-const request = require('request'),
-  utils = require('../lib/utils.js');
+const request = require('request');
+const logger = require('winston');
+const merge = require('merge');
+const xim_config = require('../.xim_config.js');
+const lambdaLocal = require('../lib/lambdalocal.js');
+const utils = require('../lib/utils.js');
 
 /*
- * Local executor for Amazon Lambda function
+ * Quantum Local executor for Amazon Lambda function
  */
-(function() {
-
-    var logger = require('winston');
+(() => {
+    const quantum_token = xim_config.quantum_token || '';
     logger.level = 'info';
     logger.configure({
         transports: [
-            new (logger.transports.Console)({handleExceptions: true, json: false, colorize: true})
-        ]
+            new (logger.transports.Console)({ handleExceptions: true, json: false, colorize: true })
+        ],
     });
 
-    var lambdaLocal = require('../lib/lambdalocal.js'),
-        utils = require('../lib/utils.js');
     lambdaLocal.setLogger(logger);
 
     // process opts
@@ -79,97 +90,135 @@ const request = require('request'),
     const load_post_data = JSON.stringify(load_post_object);
 
     const https_options = {
-      method: 'POST',
-      url: `${process.env.xim_url}/loadExtraPayload`,
-      headers: {
+        method: 'POST',
+        url: `${process.env.xim_url}/loadExtraPayload`,
+        headers: {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(load_post_data),
-      },
+        Authorization: `Bearer ${quantum_token}`,
+        },
     };
 
     // Load extra payload before call local XIM driver.
     const req = request(https_options, (error, response, load_body) => {
-      if (response.statusCode != 200) {
+        if (response.statusCode != 200) {
         // error handling
-        logger.log('error', 'Invalid XIM driver input.');
+        logger.error('error', 'Invalid XIM driver input.');
+        logger.error('error', load_post_data);
+        logger.error('error', load_post_data);
         console.log(load_body);
         process.exit(0);
-      } else {
-        const bodyJSON = JSON.parse(JSON.parse(load_body));
-        if (typeof bodyJSON.message !== 'undefined') {
-          // TO-do: error handling
-          console.log(load_body);
-        }
-        event.xim_content = bodyJSON.xim_content;
-        // execute
-        lambdaLocal.execute({
-            event: event,
-            lambdaPath: lambdaPath,
-            lambdaHandler: lambdaHandler,
-            profilePath: profilePath,
-            profileName: profileName,
-            region: region,
-            callbackWaitsForEmptyEventLoop: callbackWaitsForEmptyEventLoop,
-            timeoutMs: timeoutMs,
-            callback: function(err , data) { //data unused
-                logger.log('info', '-----');
-                if (err === null) {
-                  const result_json = JSON.parse(data.body);
-                  const save_post_object = JSON.parse(JSON.stringify(result_json));
-                  save_post_object.quantum_token = load_post_object.quantum_token;
-                  const save_post_data = JSON.stringify(save_post_object);
+        } else {
+        try {
+            const bodyJSON = JSON.parse(load_body);
+            if (bodyJSON.result && bodyJSON.result.err_no !== 0) {
+                logger.error('LoadExtraPayload: fail');
+                logger.error(bodyJSON);
 
-                  const https_options = {
-                    method: 'POST',
-                    url: `${process.env.xim_url}/saveExtraPayload`,
-                    headers: {
-                      'Content-Type': 'application/json',
-                      'Content-Length': Buffer.byteLength(save_post_data),
-                    },
-                  };
-
-                  // Save extra payload after called local XIM driver.
-                  const req = request(https_options, (error, response, save_body) => {
-                    if (response.statusCode != 200) {
-                      // error handling
-                      logger.log('error', 'Invalid XIM driver output.');
-                      console.log(save_body);
-                      process.exit(0);
-                    } else {
-                      delete result_json.method;
-                      delete result_json.xim_content;
-                      logger.log('info', 'Message');
-                      logger.log('info', '------');
-                      utils.outputJSON(result_json, logger);
-                      logger.log('info', 'lambda-local successfully complete.');
-                      process.exit(0);
-                    }
-                  });
-
-                  req.write(save_post_data);
-                  req.end();
-                } else {
-                    logger.log('error', 'lambda-local failed.');
-                    // Finish the process
-                    process.exit(1);
+                if (bodyJSON.result.err_no === 100) {
+                    logger.error('quantum_token:', quantum_token);
                 }
+                process.exit(1);
             }
-        });
-      }
 
+            if (bodyJSON.extra_payload && bodyJSON.extra_payload.xim_content) {
+                event.xim_content = bodyJSON.extra_payload.xim_content;
+            }
+            
+            // execute
+            lambdaLocal.execute({
+                event: event,
+                lambdaPath: lambdaPath,
+                lambdaHandler: lambdaHandler,
+                profilePath: profilePath,
+                profileName: profileName,
+                region: region,
+                callbackWaitsForEmptyEventLoop: callbackWaitsForEmptyEventLoop,
+                timeoutMs: timeoutMs,
+                callback: (err ,data) => {
+                    logger.log('info', '-----');
+                    if (err === null) {
+                        if (data.statusCode === 200) {
+                            try {
+                                const result_json = JSON.parse(data.body);
+                                result_json.quantum_token = load_post_object.quantum_token;
+                                const save_post_data = JSON.stringify(result_json);
+                                if (result_json.result && result_json.result.err_no === 0) {
+                                    const https_options = {
+                                        method: 'POST',
+                                        url: `${process.env.xim_url}/saveExtraPayload`,
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'Content-Length': Buffer.byteLength(save_post_data),
+                                            Authorization: `Bearer ${quantum_token}`,
+                                        },
+                                    };
+                
+                                    // Save extra payload after called local XIM driver.
+                                    const save_req = request(https_options, (save_error, save_response, save_body) => {
+                                        if (save_error) {
+                                            logger.error('saveExtraPayload requesst error');
+                                            process.exit(1);
+                                        } else if (save_response.statusCode !== 200) {
+                                            // error handling
+                                            logger.error('Invalid XIM driver output.');
+                                            logger.error('save_response.statusCode:', save_response.statusCode);
+                                            logger.error('save_body.statusCode:', save_body);
+                                            process.exit(1);
+                                        } else {
+                                            delete result_json.method;
+                                            delete result_json.xim_content;
+                                            logger.log('info', 'Message');
+                                            logger.log('info', '------');
+                                            utils.outputJSON(result_json, logger);
+                                            logger.log('info', 'lambda-local successfully complete.');
+                                            process.exit(0);
+                                        }
+                                    });
+                
+                                    save_req.write(save_post_data);
+                                    save_req.end();
+                                } else {
+                                    logger.error('ximDriver return result fail');
+                                    logger.error(result_json);
+                                    process.exit(1);
+                                }
+                            } catch(data_error) {
+                                logger.error('ximDriver invalid output');
+                                logger.error(data_error);
+                                logger.error(event);
+                                process.exit(1);
+                            }
+                        } else {
+                            logger.error('XIM Driver invalid output.');
+                            logger.error(data);
+                            // Finish the process
+                            process.exit(1);    
+                        }
+                    } else {
+                        logger.error('error', 'lambda-local failed.');
+                        logger.error(err);
+                        // Finish the process
+                        process.exit(1);
+                    }
+                }
+            });    
+        } catch (err) {
+            logger.error('Invalid JSON data');
+            logger.error(err);
+            logger.error(load_body);
+            process.exit(1);
+        }
+        }
     });
 
     req.write(load_post_data);
     req.end();
 
-
-
-
     // Handling timeout
     setTimeout(function() {
-        logger.log('error', '-----');
-        logger.log('error', 'Task timed out after ' + (timeoutMs / 1000).toFixed(2) + ' seconds');
+        logger.error('error', '-----');
+        logger.error('error', 'Task timed out after ' + (timeoutMs / 1000).toFixed(2) + ' seconds');
         process.exit();
     }, timeoutMs);
-
 })();
