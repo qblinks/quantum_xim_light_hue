@@ -101,13 +101,20 @@ const utils = require('../lib/utils.js');
 
     // Load extra payload before call local XIM driver.
     const req = request(https_options, (error, response, load_body) => {
-        if (response.statusCode != 200) {
-        // error handling
-        logger.error('error', 'Invalid XIM driver input.');
-        logger.error('error', load_post_data);
-        logger.error('error', load_post_data);
-        console.log(load_body);
-        process.exit(0);
+        if (error) {
+            // error handling
+            logger.error('error', 'loadExtraPayload fail');
+            logger.error('error', error);
+            logger.error('url:', process.env.xim_url);
+            console.log(process.env);
+            process.exit(0);
+        } else if (response.statusCode != 200) {
+            // error handling
+            logger.error('error', 'Invalid XIM driver input.');
+            logger.error('error', load_post_data);
+            logger.error('error', load_post_data);
+            console.log(load_body);
+            process.exit(0);
         } else {
         try {
             const bodyJSON = JSON.parse(load_body);
