@@ -187,7 +187,7 @@ const utils = require('../lib/utils.js');
                                     save_req.end();
                                 } else {
                                     logger.error('ximDriver return result fail');
-                                    logger.error(result_json);
+                                    utils.outputJSON(result_json, logger);
                                     process.exit(1);
                                 }
                             } catch(data_error) {
