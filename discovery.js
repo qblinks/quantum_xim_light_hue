@@ -24,12 +24,13 @@ const request = require('request');
 function get_list_and_state(hue_access_token, bridgeid, get_state_callback) {
   const get_state_options = {
     method: 'GET',
-    url: `https://api.meethue.com/v1/bridges/${bridgeid}`,
+    url: `https://api.meethue.com/v2/bridges/${bridgeid}`,
     headers: {
       'content-type': 'application/json',
       authorization: `Bearer ${hue_access_token}`,
     },
   };
+  console.log('hue_access_token:', hue_access_token);
   request(get_state_options, (error, response, body) => {
     if (error || body === 'Gateway Timeout') {
       if (body === 'Gateway Timeout') {
