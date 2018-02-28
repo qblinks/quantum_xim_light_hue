@@ -21,10 +21,10 @@ const request = require('request');
  * @param {string} hue_username obtained hue username
  * @param {function} get_state_cb callback of this function
  */
-function get_list_and_state(hue_access_token, bridgeid, get_state_callback) {
+function get_list_and_state(hue_access_token, bridgeid, username, get_state_callback) {
   const get_state_options = {
     method: 'GET',
-    url: `https://api.meethue.com/v2/bridges/${bridgeid}`,
+    url: `https://api.meethue.com/v2/bridges/${bridgeid}/${username}/lights`,
     headers: {
       'content-type': 'application/json',
       authorization: `Bearer ${hue_access_token}`,
@@ -32,6 +32,8 @@ function get_list_and_state(hue_access_token, bridgeid, get_state_callback) {
   };
   console.log('hue_access_token:', hue_access_token);
   request(get_state_options, (error, response, body) => {
+    console.log('body:', body);
+    console.log('get_state_options:', get_state_options);
     if (error || body === 'Gateway Timeout') {
       if (body === 'Gateway Timeout') {
         get_state_callback(121);
@@ -62,6 +64,10 @@ function discovery(options, callback) {
       callback_options.result.err_no = 120;
       callback_options.result.err_msg = 'Invalid Bridge ID';
       callback(callback_options);
+    } else if (!options.xim_content.userName) {
+      callback_options.result.err_no = 120;
+      callback_options.result.err_msg = 'Invalid Username';
+      callback(callback_options);
     } else {
       callback_options.result.err_no = 900;
       callback_options.result.err_msg = 'Unknown Error';
@@ -71,8 +77,9 @@ function discovery(options, callback) {
     callback_options.list = [];
     callback_options.groups = [];
     callback_options.xim_content.lights = [];
+    console.log('options.xim_content:', options.xim_content);
     get_list_and_state(options.xim_content.hue_access_token,
-    options.xim_content.bridgeid, (result) => {
+    options.xim_content.bridgeid, options.xim_content.userName, (result) => {
       if (result === false || result === 121 || result.code === '404' || result.fault || result.code === '109') {
         if (result.fault && result.fault.detail && result.fault.detail.errorcode === 'keymanagement.service.access_token_expired') {
           callback_options.result.err_no = 112;

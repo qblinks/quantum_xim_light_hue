@@ -162,7 +162,7 @@ function authenticate(options, callback) {
   .then(getUserName)
   .then((data) => {
     console.log('data:', data);
-    callback_options.xim_content.bridgeid = data.bridgeId;
+    callback_options.xim_content.bridgeId = callback_options.xim_content.bridgeid = data.bridgeId;
     callback_options.xim_content.userName = data.userName;
     callback_options.result.err_no = 0;
     callback_options.result.err_msg = 'ok';
