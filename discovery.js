@@ -30,10 +30,7 @@ function get_list_and_state(hue_access_token, bridgeid, username, get_state_call
       authorization: `Bearer ${hue_access_token}`,
     },
   };
-  console.log('hue_access_token:', hue_access_token);
   request(get_state_options, (error, response, body) => {
-    console.log('body:', body);
-    console.log('get_state_options:', get_state_options);
     if (error || body === 'Gateway Timeout') {
       if (body === 'Gateway Timeout') {
         get_state_callback(121);
@@ -77,7 +74,6 @@ function discovery(options, callback) {
     callback_options.list = [];
     callback_options.groups = [];
     callback_options.xim_content.lights = [];
-    console.log('options.xim_content:', options.xim_content);
     get_list_and_state(options.xim_content.hue_access_token,
     options.xim_content.bridgeid, options.xim_content.userName, (result) => {
       if (result === false || result === 121 || result.code === '404' || result.fault || result.code === '109') {
@@ -91,24 +87,23 @@ function discovery(options, callback) {
           callback_options.result.err_no = 121;
           callback_options.result.err_msg = 'Bridge Timeout';
         } else {
-          console.log(result);
           callback_options.result.err_no = 900;
           callback_options.result.err_msg = 'Unknow Error';
         }
         callback(callback_options);
       } else {
         callback_options.xim_content.lights = {};
-        Object.keys(result.lights).forEach((key) => {
+        Object.keys(result).forEach((key) => {
           const light = {};
-          light.device_name = result.lights[key].name;
+          light.device_name = result[key].name;
           light.device_id = `${key}`;
           light.is_group = false;
-          if (result.lights[key].type === 'Dimmable light' ||
-              result.lights[key].type === 'Dimmable plug-in unit') {
+          if (result[key].type === 'Dimmable light' ||
+              result[key].type === 'Dimmable plug-in unit') {
             light.light_type = 'dimmer';
-          } else if (result.lights[key].type === 'On/Off light') {
+          } else if (result[key].type === 'On/Off light') {
             light.light_type = 'white';
-          } else if (result.lights[key].type === 'Color temperature light') {
+          } else if (result[key].type === 'Color temperature light') {
             light.light_type = 'color';
           } else {
             light.light_type = 'color';
@@ -117,25 +112,25 @@ function discovery(options, callback) {
           light.native_toggle_support = false;
           light.is_group = false;
           light.light_status = {};
-          if (light.light_type === 'color' && result.lights[key].type !== 'Color temperature light' && result.lights[key].type !== 'On/Off plug-in unit') {
-            light.light_status.hue = parseInt((result.lights[key].state.hue * 360) / 65534, 10);
+          if (light.light_type === 'color' && result[key].type !== 'Color temperature light' && result[key].type !== 'On/Off plug-in unit') {
+            light.light_status.hue = parseInt((result[key].state.hue * 360) / 65534, 10);
             light.light_status.saturation =
-              parseInt((result.lights[key].state.sat * 100) / 254, 10);
+              parseInt((result[key].state.sat * 100) / 254, 10);
 
             if (isNaN(light.light_status.hue)) {
-              console.log(result.lights[key]);
+              console.log(result[key]);
             }
           }
 
-          if (result.lights[key].type !== 'On/Off light') {
+          if (result[key].type !== 'On/Off light') {
             light.light_status.brightness =
-              parseInt((result.lights[key].state.bri * 100) / 254, 10);
+              parseInt((result[key].state.bri * 100) / 254, 10);
           }
 
-          light.light_status.onoff = result.lights[key].state.on;
+          light.light_status.onoff = result[key].state.on;
           callback_options.xim_content.lights[key] = light;
 
-          if (result.lights[key].type !== 'On/Off plug-in unit') {
+          if (result[key].type !== 'On/Off plug-in unit') {
             callback_options.list.push(light);
           }
         });

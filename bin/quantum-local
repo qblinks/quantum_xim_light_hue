@@ -132,8 +132,6 @@ const utils = require('../lib/utils.js');
                 event.xim_content = bodyJSON.extra_payload.xim_content;
             }
 
-            console.log('xim_content:', event.xim_content);
-
             // execute
             lambdaLocal.execute({
                 event: event,
@@ -150,13 +148,11 @@ const utils = require('../lib/utils.js');
                         if (data.statusCode === 200) {
                             try {
                                 const result_json = JSON.parse(data.body);
-                                console.log('result.xim_content:', result_json.xim_content);
                                 bodyJSON.extra_payload.xim_content = result_json.xim_content;
                                 bodyJSON.xim_type = load_post_object.xim_type;
                                 bodyJSON.xim_channel = load_post_object.xim_channel;
                                 bodyJSON.xim_channel_set = load_post_object.xim_channel_set;
 
-                                console.log('bodyJSON:', bodyJSON);
                                 if (result_json.result && result_json.result.err_no === 0) {
                                     const https_options = {
                                         method: 'POST',
@@ -170,7 +166,6 @@ const utils = require('../lib/utils.js');
                 
                                     // Save extra payload after called local XIM driver.
                                     const save_req = request(https_options, (save_error, save_response, save_body) => {
-                                        console.log('request: saveExtraPayload');
                                         if (save_error) {
                                             logger.error('saveExtraPayload requesst error');
                                             process.exit(1);
@@ -183,7 +178,6 @@ const utils = require('../lib/utils.js');
                                         } else {
                                             delete result_json.method;
                                             delete result_json.xim_content;
-                                            console.log('result_json:', result_json);
                                             logger.log('info', 'Message');
                                             logger.log('info', '------');
                                             utils.outputJSON(result_json, logger);
@@ -193,7 +187,6 @@ const utils = require('../lib/utils.js');
                                     });
                 
                                     save_req.write(JSON.stringify(bodyJSON));
-                                    console.log('write:', JSON.stringify(bodyJSON));
                                     save_req.end();
                                 } else {
                                     logger.error('ximDriver return result fail');
