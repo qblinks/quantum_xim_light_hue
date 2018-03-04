@@ -25,10 +25,10 @@ const math = require('mathjs');
  * @param {string} actionbody the action request
  * @param {function} action_cb callback of this function
  */
-function goaction(hue_access_token, bridgeid, no, actionbody, actionCb) {
+function goaction(hue_access_token, bridgeid, username, no, actionbody, actionCb) {
   const options = {
     method: 'PUT',
-    url: `https://api.meethue.com/v1/bridges/${bridgeid}/lights/${no}/state`,
+    url: `https://api.meethue.com/v2/bridges/${bridgeid}/${username}/lights/${no}/state`,
     headers: {
       'content-type': 'application/json',
       authorization: `Bearer ${hue_access_token}` },
@@ -36,9 +36,10 @@ function goaction(hue_access_token, bridgeid, no, actionbody, actionCb) {
     body: actionbody,
   };
   if (no > 90000) {
-    options.url = `https://api.meethue.com/v1/bridges/${bridgeid}/groups/${no - 90000}/action`;
+    options.url = `https://api.meethue.com/v2/bridges/${bridgeid}/${username}/groups/${no - 90000}/action`;
   }
   request(options, (error, response, body) => {
+    console.log('body:', body);
     if (error) actionCb(false);
     if (body.fault || body.code === '404' || body.code === '109') {
       actionCb(false);
@@ -181,6 +182,7 @@ function action(option, callback) {
   }
   // http request
   goaction(option.xim_content.hue_access_token, option.xim_content.bridgeid,
+    option.xim_content.userName,
     parseInt(option.device_id, 10), hue, (result) => {
       callback_option.result = {};
       if (result === false) {

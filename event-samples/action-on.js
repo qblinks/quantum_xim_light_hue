@@ -11,7 +11,7 @@
 
 const xim_config = require('../.xim_config.js');
 
-const my_quantum_token = xim_config.laboratory.quantum_token;
+const my_quantum_token = xim_config.quantum_token;
 const my_device_id = xim_config.laboratory.hue.device_id;
 
 module.exports = {
