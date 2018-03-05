@@ -21,10 +21,10 @@ const request = require('request');
  * @param {string} hue_username obtained hue username
  * @param {function} get_state_cb callback of this function
  */
-function get_state(hue_access_token, bridgeid, id, get_state_callback) {
+function get_state(hue_access_token, bridgeid, username, id, get_state_callback) {
   const get_state_options = {
     method: 'GET',
-    url: `https://api.meethue.com/v1/bridges/${bridgeid}/lights/${id}`,
+    url: `https://api.meethue.com/v2/bridges/${bridgeid}/${username}/lights/${id}`,
     headers: {
       'content-type': 'application/json',
       authorization: `Bearer ${hue_access_token}`,
@@ -56,7 +56,9 @@ function stat(options, callback) {
     callback_option.result.err_msg = 'No Access Token';
     callback(callback_option);
   } else {
-    get_state(options.xim_content.hue_access_token, options.xim_content.bridgeid,
+    get_state(options.xim_content.hue_access_token,
+      options.xim_content.bridgeid,
+      options.xim_content.userName,
       options.device_id, (result) => {
         if (result.code === '404' || result.fault || result.code === '109') {
           console.log(result);
