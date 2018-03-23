@@ -19,3 +19,7 @@
 ```
 quantum-local -l index.js -h handler -e event-samples/discovery.js -t 15
 ```
+
+## Reference
+
+1. [Remote Hue API v2](https://developers.meethue.com/documentation/remote-hue-api-v2)
